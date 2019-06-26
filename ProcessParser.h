@@ -27,10 +27,10 @@ private:
     public:
     static string getCmd(string pid);
     static vector<string> getPidList();
-    static std::string getVmSize(string pid);
+    static std::string getVmSize(string pid); //check
     static std::string getCpuPercent(string pid);
-    static long int getSysUpTime();
-    static std::string getProcUpTime(string pid);
+    static long int getSysUpTime(); //check
+    static std::string getProcUpTime(string pid); //check
     static string getProcUser(string pid);
     static vector<string> getSysCpuPercent(string coreNumber = "");
     static float getSysRamPercent();
@@ -45,3 +45,84 @@ private:
 };
 
 // TODO: Define all of the above functions below:
+
+string ProcessParser::getVmSize(string pid) {
+  string line;
+  string name = "VmData";
+  string value;
+  float result;
+  
+  //Opening stream for specific file
+  ifstream stream = Util::getStream((Path::basePath() + pid + Path::statusPath()));
+  while(std::getline(stream, line)) {
+    if(line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      
+      result = (stof(values[1])/float(1024*1024));
+      break;
+    }
+  }
+  return to_string(result);
+}
+
+string ProcessParser::getProcUpTime(string pid) {
+  string line;
+  float result;
+  ifstream stream = Util::getStream((Path::basePath() + pid + "/" + Path::statPath()));
+  getline(stream,line);
+  istringstream buf(line);
+  istream_iterator<string> beg(buf), end;
+  vector<string> values(beg, end);
+
+  return to_string(float(stof(values[13])/sysconf(_SC_CLK_TCK)));
+}
+
+long int ProcessParser::getSysUpTime() {
+  string line;
+  long int result;
+  ifstream stream = Util::getStream((Path::basePath() + Path::upTimePath()));
+  getline(stream, line);
+  istringstream buf(line);
+  istream_iterator<string> beg(buf), end;
+  vector<string> values(beg, end);
+
+  result = stoi(values[0]);
+  return result;
+}
+
+string ProcessParser::getProcUser(string pid) {
+  string line;
+  string result;
+  string uid;
+
+  ifstream stream = Util::getStream((Path::basePath() + pid + Path::statusPath()));
+  string name = "Uid";
+
+  while(std::getline(stream, line)) {
+    if(line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      
+      uid = values[1];
+      break;
+    }
+  }
+
+  stream = Util::getStream("/etc/passwd");
+  while(std::getline(stream, line)) {
+    stringstream buf(line);
+    string word;
+    vector<string> parts;
+    while(std::getline(buf, word, ':')) {
+      parts.push_back(word);
+      if(word == uid) {
+        result = parts[0];
+        return result;
+      }
+    }
+  }
+
+}
