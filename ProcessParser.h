@@ -28,7 +28,7 @@ private:
     static string getCmd(string pid);
     static vector<string> getPidList();
     static std::string getVmSize(string pid); //check
-    static std::string getCpuPercent(string pid);
+    static std::string getCpuPercent(string pid); //check
     static long int getSysUpTime(); //check
     static std::string getProcUpTime(string pid); //check
     static string getProcUser(string pid);
@@ -124,5 +124,31 @@ string ProcessParser::getProcUser(string pid) {
       }
     }
   }
+
+}
+
+std::string ProcessParser::getCpuPercent(string pid) {
+  string line;
+  string value;
+  float result;
+
+  ifstream stream = Util::getStream((Path::basePath() + pid + "/" + Path::statPath()));
+  getline(stream, line);
+
+  istringstream buf(line);
+  istream_iterator<string> beg(buf), end;
+  vector<string> values(beg, end);
+
+  float procUpTime = stof(getProcUpTime(pid));
+  float stime = stof(values[14]);
+  float cutime = stof(values[15]);
+  float cstime = stof(values[16]);
+  float starttime = stof(values[21]);
+  float uptime = getSysUpTime();
+  float freq = sysconf(_SC_CLK_TCK);
+  float total_time = procUpTime + stime + cutime + cstime;
+  float seconds = uptime - (starttime/freq);
+  result = 100.0*((total_time/freq)/seconds);
+  return to_string(result);
 
 }
