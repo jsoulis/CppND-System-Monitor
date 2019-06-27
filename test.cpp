@@ -34,6 +34,7 @@ int main() {
 
     cout<<"sys ram percent test" <<endl;
     cout<<ProcessParser::getSysRamPercent()<<endl;
-
+    cout<<ProcessParser::getSysKernelVersion()<<endl;
+    cout<<ProcessParser::getOSName()<<endl;
 }
 

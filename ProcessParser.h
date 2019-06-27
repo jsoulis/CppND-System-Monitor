@@ -33,13 +33,13 @@ private:
     static std::string getProcUpTime(string pid); //check
     static string getProcUser(string pid); //check
     static vector<string> getSysCpuPercent(string coreNumber = ""); //check
-    static float getSysRamPercent();
-    static string getSysKernelVersion();
+    static float getSysRamPercent(); //check
+    static string getSysKernelVersion(); //check
     static int getNumberOfCores(); //check
     static int getTotalThreads();
     static int getTotalNumberOfProcesses();
     static int getNumberOfRunningProcesses();
-    static string getOSName();
+    static string getOSName(); //check
     static std::string PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2); //check
     static bool isPidExisting(string pid);
 };
@@ -271,4 +271,36 @@ float ProcessParser::getSysRamPercent() {
   }
   ram_percent = float(100.0 * (1 - (free_mem/(total_mem - buffers))));
   return ram_percent;
+}
+
+string ProcessParser::getSysKernelVersion() {
+  string line;
+  ifstream stream = Util::getStream(Path::basePath() + Path::versionPath());
+  getline(stream, line);
+  istringstream buf(line);
+  istream_iterator<string> beg(buf), end;
+  vector<string> result(beg, end);
+  return result[2];
+}
+
+string ProcessParser::getOSName() {
+  string line;
+  ifstream stream = Util::getStream("/etc/os-release");
+  string name = "PRETTY_NAME";
+  string result;
+  
+  while(getline(stream,line)) {
+    if(line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      result = values[0] + " " + values[1] + " " + values[2];
+      break;
+    }
+  }
+  result.erase(0,13);
+  result.erase(result.end()-1);
+  return result;
+
+  
 }
