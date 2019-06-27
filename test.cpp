@@ -26,6 +26,7 @@ int main() {
     }
     */
    cout<< ProcessParser::getCmd(pid) <<endl;
+   cout << ProcessParser::getNumberOfCores() <<endl;
 
 }
 

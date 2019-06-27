@@ -25,7 +25,7 @@ class ProcessParser{
 private:
     std::ifstream stream;
     public:
-    static string getCmd(string pid);
+    static string getCmd(string pid); //check
     static vector<string> getPidList(); //check
     static std::string getVmSize(string pid); //check
     static std::string getCpuPercent(string pid); //check
@@ -176,4 +176,23 @@ string ProcessParser::getCmd(string pid) {
   ifstream stream = Util::getStream((Path::basePath() + pid + "/" + Path::cmdPath()));
   getline(stream, line);
   return line;
+}
+
+int ProcessParser::getNumberOfCores() {
+  int result = 0;
+  string name = "cpu cores";
+  string line;
+
+  ifstream stream = Util::getStream((Path::basePath() + "cpuinfo"));
+  while(getline(stream,line)){
+    if(line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      
+      result += stoi(values[3]);
+    }
+  }
+  return result;
+
 }
