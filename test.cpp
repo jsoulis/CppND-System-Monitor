@@ -27,6 +27,10 @@ int main() {
     */
    cout<< ProcessParser::getCmd(pid) <<endl;
    cout << ProcessParser::getNumberOfCores() <<endl;
+   
+    for (auto & item : ProcessParser::getSysCpuPercent()) {
+        cout << item <<endl;
+    }
 
 }
 

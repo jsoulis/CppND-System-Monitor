@@ -31,11 +31,11 @@ private:
     static std::string getCpuPercent(string pid); //check
     static long int getSysUpTime(); //check
     static std::string getProcUpTime(string pid); //check
-    static string getProcUser(string pid);
-    static vector<string> getSysCpuPercent(string coreNumber = "");
+    static string getProcUser(string pid); //check
+    static vector<string> getSysCpuPercent(string coreNumber = ""); //check
     static float getSysRamPercent();
     static string getSysKernelVersion();
-    static int getNumberOfCores();
+    static int getNumberOfCores(); //check
     static int getTotalThreads();
     static int getTotalNumberOfProcesses();
     static int getNumberOfRunningProcesses();
@@ -195,4 +195,42 @@ int ProcessParser::getNumberOfCores() {
   }
   return result;
 
+}
+
+vector<string> ProcessParser::getSysCpuPercent(string coreNumber) {
+  vector<string> result;
+  string line;
+  string name = "cpu" + coreNumber;
+  ifstream stream = Util::getStream((Path::basePath() + "/" + Path::statPath()));
+  while(getline(stream, line)) {
+    if(line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      result = vector<string>(beg, end);
+      return result;
+    }
+  }
+}
+
+float getSysActiveCpuTime(vector<string> values) {
+  return (stof(values[S_USER]) + 
+          stof(values[S_NICE]) + 
+          stof(values[S_SYSTEM]) + 
+          stof(values[S_IRQ]) + 
+          stof(values[S_SOFTIRQ]) + 
+          stof(values[S_STEAL]) + 
+          stof(values[S_GUEST]) + 
+          stof(values[S_GUEST_NICE]));
+}
+
+float getSysIdleCpuTime(vector<string> values) {
+  return (stof(values[S_IDLE]) + stof(values[S_IOWAIT]));
+}
+
+std::string ProcessParser::PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2) {
+  float activeTime = getSysActiveCpuTime(values2) - getSysActiveCpuTime(values1);
+  float idleTime = getSysIdleCpuTime(values2) - getSysIdleCpuTime(values1);
+  float totalTime = activeTime + idleTime;
+  float result = 100.0*(activeTime / totalTime);
+  return to_string(result);
 }
