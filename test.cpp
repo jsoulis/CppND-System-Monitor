@@ -14,7 +14,7 @@
 using namespace std;
 
 int main() {
-    string pid = "647";
+    string pid = ProcessParser::getPidList()[5];
     cout << stof(ProcessParser::getVmSize(pid)) * 1024 * 1024 << endl;
     cout << ProcessParser::getProcUpTime(pid) <<endl;
     cout << ProcessParser::getSysUpTime() <<endl;
@@ -31,6 +31,9 @@ int main() {
     for (auto & item : ProcessParser::getSysCpuPercent()) {
         cout << item <<endl;
     }
+
+    cout<<"sys ram percent test" <<endl;
+    cout<<ProcessParser::getSysRamPercent()<<endl;
 
 }
 

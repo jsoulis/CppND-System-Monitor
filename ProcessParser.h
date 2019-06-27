@@ -40,7 +40,7 @@ private:
     static int getTotalNumberOfProcesses();
     static int getNumberOfRunningProcesses();
     static string getOSName();
-    static std::string PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2);
+    static std::string PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2); //check
     static bool isPidExisting(string pid);
 };
 
@@ -233,4 +233,42 @@ std::string ProcessParser::PrintCpuStats(std::vector<std::string> values1, std::
   float totalTime = activeTime + idleTime;
   float result = 100.0*(activeTime / totalTime);
   return to_string(result);
+}
+
+float ProcessParser::getSysRamPercent() {
+  string line;
+  float ram_percent;
+
+  float buffers = 0;
+  float total_mem = 0;
+  float free_mem = 0;
+
+  string memAvail = "MemAvailable:";
+  string memFree = "MemFree:";
+  string buffer = "Buffers:";
+  cout<<"enter function"<<endl;
+
+  ifstream stream = Util::getStream((Path::basePath() + Path::memInfoPath()));
+  while(getline(stream, line)) {
+    if (line.compare(0, memAvail.size(), memAvail) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      total_mem = stof(values[1]);
+    }
+    if(line.compare(0, memFree.size(), memFree) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> result(beg, end);
+      free_mem = stof(result[1]);
+    }
+    if(line.compare(0, buffer.size(), buffer) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> result(beg, end);
+      buffers = stof(result[1]);
+    }
+  }
+  ram_percent = float(100.0 * (1 - (free_mem/(total_mem - buffers))));
+  return ram_percent;
 }
