@@ -246,7 +246,6 @@ float ProcessParser::getSysRamPercent() {
   string memAvail = "MemAvailable:";
   string memFree = "MemFree:";
   string buffer = "Buffers:";
-  cout<<"enter function"<<endl;
 
   ifstream stream = Util::getStream((Path::basePath() + Path::memInfoPath()));
   while(getline(stream, line)) {
@@ -357,4 +356,13 @@ int ProcessParser::getNumberOfRunningProcesses() {
     }
   }
   return result;
+}
+
+bool ProcessParser::isPidExisting(string pid) {
+  bool exist = false;
+  vector<string> pids = getPidList();
+  for (auto & item : pids) {
+    if(item == pid) exist = true;
+  }
+  return exist;
 }
