@@ -26,7 +26,7 @@ private:
     std::ifstream stream;
     public:
     static string getCmd(string pid);
-    static vector<string> getPidList();
+    static vector<string> getPidList(); //check
     static std::string getVmSize(string pid); //check
     static std::string getCpuPercent(string pid); //check
     static long int getSysUpTime(); //check
@@ -151,4 +151,29 @@ std::string ProcessParser::getCpuPercent(string pid) {
   result = 100.0*((total_time/freq)/seconds);
   return to_string(result);
 
+}
+
+vector<string> ProcessParser::getPidList() {
+  vector<string> result;
+  bool isNumber = true;
+  DIR *dir;
+  struct dirent *ent;
+  if((dir = opendir("/proc")) != NULL) {
+    while((ent = readdir(dir)) != NULL) {
+      for(int i = 0; ent->d_name[i] != '\0'; i++) {
+        if(!isdigit(ent->d_name[i])) isNumber = false;
+      }
+      if(isNumber) result.push_back(ent->d_name);
+      isNumber = true;
+    }
+  }
+  closedir(dir);
+  return result;
+}
+
+string ProcessParser::getCmd(string pid) {
+  string line;
+  ifstream stream = Util::getStream((Path::basePath() + pid + "/" + Path::cmdPath()));
+  getline(stream, line);
+  return line;
 }
