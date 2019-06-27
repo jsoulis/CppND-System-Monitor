@@ -62,9 +62,20 @@ void SysInfo::setLastCpuMeasures(){
 }
 void SysInfo::setCpuCoresStats(){
 // Getting data from files (previous data is required)
+// THIS IS FUNCTION CRASH ORIGINATED FROM
     for(int i=0;i<this->currentCpuCoresStats.size();i++){
+
+        //test
+        /* cout<<i<<": ";
+        for(auto & a: ProcessParser::getSysCpuPercent(to_string(i))) {
+            cout<<a<<" ,";
+        }
+        cout<<endl; */
+        //test
+        
         this->currentCpuCoresStats[i] = ProcessParser::getSysCpuPercent(to_string(i));
     }
+    
     for(int i=0;i<this->currentCpuCoresStats.size();i++){
     // after acquirement of data we are calculating every core percentage of usage
         this->coresStats[i] = ProcessParser::PrintCpuStats(this->lastCpuCoresStats[i],this->currentCpuCoresStats[i]);

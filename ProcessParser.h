@@ -52,6 +52,7 @@ string ProcessParser::getVmSize(string pid) {
   string value;
   float result;
   
+  //cout<<(Path::basePath() + pid + Path::statusPath())<<endl;
   //Opening stream for specific file
   ifstream stream = Util::getStream((Path::basePath() + pid + Path::statusPath()));
   while(std::getline(stream, line)) {
@@ -70,6 +71,8 @@ string ProcessParser::getVmSize(string pid) {
 string ProcessParser::getProcUpTime(string pid) {
   string line;
   float result;
+
+  //cout<<(Path::basePath() + pid + "/" + Path::statPath())<<endl;
   ifstream stream = Util::getStream((Path::basePath() + pid + "/" + Path::statPath()));
   getline(stream,line);
   istringstream buf(line);
@@ -97,6 +100,7 @@ string ProcessParser::getProcUser(string pid) {
   string result;
   string uid;
 
+  //cout<<(Path::basePath() + pid + Path::statusPath())<<endl;
   ifstream stream = Util::getStream((Path::basePath() + pid + Path::statusPath()));
   string name = "Uid";
 
@@ -132,6 +136,7 @@ std::string ProcessParser::getCpuPercent(string pid) {
   string value;
   float result;
 
+  //cout<<(Path::basePath() + pid + "/" + Path::statPath())<<endl;
   ifstream stream = Util::getStream((Path::basePath() + pid + "/" + Path::statPath()));
   getline(stream, line);
 
@@ -173,17 +178,24 @@ vector<string> ProcessParser::getPidList() {
 
 string ProcessParser::getCmd(string pid) {
   string line;
-  ifstream stream = Util::getStream((Path::basePath() + pid + "/" + Path::cmdPath()));
+
+  //cout<<(Path::basePath() + pid + Path::cmdPath())<<endl;
+  ifstream stream = Util::getStream((Path::basePath() + pid + Path::cmdPath()));
   getline(stream, line);
   return line;
 }
 
 int ProcessParser::getNumberOfCores() {
-  int result = 0;
-  string name = "cpu cores";
-  string line;
-
-  ifstream stream = Util::getStream((Path::basePath() + "cpuinfo"));
+  /*
+  this is how we were instructed to implement the getNumberOfCores() function, but I believe it is incorrect.
+  In SysInfo.h when the SysInfo constructor is called, the getOtherCores member is set by calling ProcessParser::getNumberOfCores(). This resulted in 8 cores, 2 for 
+  each cpu on the system. However, in the SysInfo constructor setAttributes() is also called. If we look at this function, it succeeds until 
+  setCPUCoresStats() function is called. In this function, We iteratively call ProcessParser::getSysCpuPercent, passing the core number,  which reads from /proc/stat..
+  however, this file only has information about 4 cpus, not 8 cores. Therefore in SysInfo::setCPUCoreStats when building the currentCpuCoresStats vector, we are adding empty 
+  vectors that cause the subsequent loop with calls to ProcessParser::PrintCpuStats to crash... Therefore I have changed the implementation of this function
+  to return the number of cpus 
+  */
+  /* ifstream stream = Util::getStream((Path::basePath() + "cpuinfo"));
   while(getline(stream,line)){
     if(line.compare(0, name.size(), name) == 0) {
       istringstream buf(line);
@@ -193,6 +205,18 @@ int ProcessParser::getNumberOfCores() {
       result += stoi(values[3]);
     }
   }
+ */
+  //TODO:
+  int result = 0;
+  string name = "cpu cores";
+  string line;
+  ifstream stream = Util::getStream((Path::basePath() + "cpuinfo"));
+  while(getline(stream,line)){
+    if(line.compare(0, name.size(), name) == 0) {
+      result++;
+    }
+  }
+  //return result;
   return result;
 
 }
@@ -307,7 +331,9 @@ int ProcessParser::getTotalThreads() {
   int result = 0;
   string name = "Threads";
   vector<string> pid_list = getPidList();
+  
   for(string & pid : pid_list) {
+    //cout<<(Path::basePath() + pid + Path::statusPath())<<endl;
     ifstream stream = Util::getStream((Path::basePath() + pid + Path::statusPath()));
     while(getline(stream, line)) {
       if(line.compare(0, name.size(), name) == 0) {
