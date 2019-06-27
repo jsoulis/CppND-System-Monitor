@@ -36,9 +36,9 @@ private:
     static float getSysRamPercent(); //check
     static string getSysKernelVersion(); //check
     static int getNumberOfCores(); //check
-    static int getTotalThreads();
-    static int getTotalNumberOfProcesses();
-    static int getNumberOfRunningProcesses();
+    static int getTotalThreads(); //check
+    static int getTotalNumberOfProcesses(); //check
+    static int getNumberOfRunningProcesses(); //check
     static string getOSName(); //check
     static std::string PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2); //check
     static bool isPidExisting(string pid);
@@ -301,6 +301,60 @@ string ProcessParser::getOSName() {
   result.erase(0,13);
   result.erase(result.end()-1);
   return result;
+}
 
+int ProcessParser::getTotalThreads() {
+  string line;
+  int result = 0;
+  string name = "Threads";
+  vector<string> pid_list = getPidList();
+  for(string & pid : pid_list) {
+    ifstream stream = Util::getStream((Path::basePath() + pid + Path::statusPath()));
+    while(getline(stream, line)) {
+      if(line.compare(0, name.size(), name) == 0) {
+        istringstream buf(line);
+        istream_iterator<string> beg(buf), end;
+        vector<string> values(beg, end);
+        result += stoi(values[1]);
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+int ProcessParser::getTotalNumberOfProcesses() {
+  string line;
+  int result = 0;
+  string name = "processes";
   
+  ifstream stream = Util::getStream((Path::basePath() + Path::statPath()));
+  while(getline(stream, line)) {
+    if(line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      result = stoi(values[1]);
+      break;
+    }
+  }
+  return result;
+}
+
+int ProcessParser::getNumberOfRunningProcesses() {
+  string line;
+  int result = 0;
+  string name = "procs_running";
+  
+  ifstream stream = Util::getStream((Path::basePath() + Path::statPath()));
+  while(getline(stream, line)) {
+    if(line.compare(0, name.size(), name) == 0) {
+      istringstream buf(line);
+      istream_iterator<string> beg(buf), end;
+      vector<string> values(beg, end);
+      result = stoi(values[1]);
+      break;
+    }
+  }
+  return result;
 }

@@ -36,5 +36,8 @@ int main() {
     cout<<ProcessParser::getSysRamPercent()<<endl;
     cout<<ProcessParser::getSysKernelVersion()<<endl;
     cout<<ProcessParser::getOSName()<<endl;
+    cout<< "thread count: " << ProcessParser::getTotalThreads()<<endl;
+    cout<< "total proc: " << ProcessParser::getTotalNumberOfProcesses() <<endl;
+    cout<< "running proc: " << ProcessParser::getNumberOfRunningProcesses() <<endl;
 }
 
